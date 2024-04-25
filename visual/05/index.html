@@ -1,0 +1,341 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GIS反演</title>
+<link rel="icon" href="../../img/logo.png">
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="../../js/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="js/js.js"></script>
+<script type="text/javascript" src="js/jquery.limarquee.js"></script>
+<script type="text/javascript" src="js/jquery.cxselect.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.2.2/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.2.1/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="css/comon0.css">
+</head>
+<style>
+  .btn_list {
+    /* background-color: #1212e7;  */
+    color: white; /* 文字颜色为白色 */
+    border: 2px solid white; /* 边框为白色 */
+    padding: 10px; /* 内边距为10px */
+    text-align: center; /* 文字居中 */
+    text-decoration: none; /* 去掉下划线 */
+    display: inline-block; /* 使元素成为行内块级元素 */
+    width: 150px;
+  }
+  /* .image-container {
+        display: inline-block;
+        position: relative;
+        margin: 10px;
+    } */
+    .image-info {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .threeD {
+    position: relative;
+    }
+
+    .image-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .image-container2 {
+      position: absolute;
+      top: 0;
+      left: 150px;
+      z-index: 1;
+    }
+    .image-container3 {
+      position: absolute;
+      top: 0;
+      left: 300px;
+      z-index: 1;
+    }
+    .image-container4 {
+      position: absolute;
+      top: 150px;
+      left: 0;
+      z-index: 1;
+    }
+    .image-container5 {
+      position: absolute;
+      top: 150px;
+      left: 150px;
+      z-index: 1;
+    }
+    .image-container6 {
+      position: absolute;
+      top: 150px;
+      left: 300px;
+      z-index: 1;
+    }
+    .image-container7 {
+      position: absolute;
+      top: 150px;
+      left: 450px;
+      z-index: 1;
+    }
+    .image-container8 {
+      position: absolute;
+      top: 300px;
+      left: 150px;
+      z-index: 1;
+    }
+    .image-container9 {
+      position: absolute;
+      top: 300px;
+      left: 300px;
+      z-index: 1;
+    }
+  </style>
+<body>
+<div style="background:#000d4a url(images/bg.jpg) center top;">
+  <div class="loading">
+    <div class="loadbox"> <img src="picture/loading.gif"> 页面加载中... </div>
+  </div>
+  <div class="back"></div>
+<div>
+  <a href="../02/index.html">
+    <div class="btn_list">主页</div>
+  </a>
+  <a href="http://localhost:82/login">
+    <div class="btn_list">后台管理系统</div>
+  </a>
+</div>
+  <div class="head">
+    <h1>地形分析展示</h1>
+    <div class="weather"><span id="showTime"></span></div>
+	  </div>
+    <script>
+var t = null;
+    t = setTimeout(time,1000);//開始运行
+    function time()
+    {
+       clearTimeout(t);//清除定时器
+       dt = new Date();
+		var y=dt.getFullYear();
+		var mt=dt.getMonth()+1;
+		var day=dt.getDate();
+       var h=dt.getHours();//获取时
+       var m=dt.getMinutes();//获取分
+       var s=dt.getSeconds();//获取秒
+       document.getElementById("showTime").innerHTML = y+"年"+mt+"月"+day+"日"+h+"时"+m+"分"+s+"秒";
+       t = setTimeout(time,1000); //设定定时器，循环运行
+    }
+</script>
+  <div class="mainbox">
+    <ul class="clearfix">
+      <li>
+        <div class="boxall" style="height:545px;">
+          <div class="navboxall" >
+            <div class="alltitle">RGB值与GIS特征分析</div>
+            <div class="navboxall"  id="echart3"> </div>
+			<div class="sycm">
+          <ul class="clearfix">
+          </ul>
+        </div>
+			</div>
+        </div>
+      </li>
+      <li>
+        <div class="boxall" style="height:545px">
+          <div class="alltitle">地形建模展示</div>
+          <video id="myVideo" loop autoplay style="width: 100%; height: 100%;">
+            <source src="./picture/GISvideo.mp4">
+        </video>
+          <!-- <div class="navboxall" id="echart4"></div> -->
+        </div>
+      </li>
+      <li>
+        <div class="boxall" style="height:280px">
+          <div class="alltitle">地形检测</div>
+          <video id="myVideo" loop autoplay style="width: 100%; height: 100%;">
+            <source src="./picture/output.mp4">
+            <div class="navboxall"  id="echart1"> </div>
+          </video>
+        </div>
+        <div class="boxall" style="height:245px">
+          <div class="alltitle">地形情况</div>
+          <div class="navboxall"  id="echart2"> </div>
+        </div>
+      </li>
+    </ul>
+    <ul class="clearfix">
+      <li>
+        <div class="boxall" style="height:390px;">
+          <div class="alltitle">地形反演数据举例</div>
+          <div class="navboxall" >
+            <div class="wraptit"> <span>RGB</span><span>RATE</span><span>SLOPE</span><span>HEIGHT</span> </div>
+            <div class="wrap">
+              <ul>
+                <li>
+                  <p><span>215, 195, 47</span><span>-0.70</span><span>0.02</span><span>673.9</span></p>
+                </li>
+                <li>
+                  <p><span>211, 129, 46</span><span>-0.55</span><span>0.52</span><span>658.4</span></p>
+                </li>
+                <li>
+                  <p><span>211, 177, 47</span><span>-0.44</span><span>0.30</span><span>656.2</span></p>
+                </li>
+                <li>
+                  <p><span>196, 171, 33</span><span>-0.42</span><span>0.52</span><span>624.5</span></p>
+                </li>
+                <li>
+                  <p><span>202, 166, 40</span><span>-0.38</span><span>0.17</span><span>635.4</span></p>
+                </li>
+                <li>
+                  <p><span>209, 184, 48</span><span>-0.36</span><span>0.10</span><span>653.1</span></p>
+                </li>
+                <li>
+                  <p><span>226, 180, 66</span><span>-0.35</span><span>0.45</span><span>641.6</span></p>
+                </li>
+                <li>
+                  <p><span>216, 214, 57</span><span>-0.26</span><span>0.47</span><span>649.3</span></p>
+                </li>
+                <li>
+                  <p><span>189, 182, 30</span><span>-0.26</span><span>0.18</span><span>616.5</span></p>
+                </li>
+                <li>
+                  <p><span>194, 183, 36</span><span>-0.26</span><span>0.05</span><span>651.6</span></p>
+                </li>
+                <li>
+                  <p><span>214, 184, 56</span><span>-0.22</span><span>0.49</span><span>656.8</span></p>
+                </li>
+				  </ul>
+        </div>
+          </div>
+        </div>
+      </li>
+      <li style="width:38%">
+        <div class="boxall" style="height:390px">
+          <div class="alltitle">DSM图</div>
+          <!-- <div class="navboxall" id="echart3"></div> -->
+          <img src="./picture/GIS_1.png" style="width: 100%; height: 100%;">
+        </div>
+      </li>
+      <li style="width:38%">
+        <div class="boxall" style="height:390px">
+          <div class="alltitle">GIS信息反演（高度，坡度）</div>
+          <div class="threeD">
+            <img src="./picture/3D.png" alt="3D Image">
+          </div>
+          <div class="image-container">
+            <img class="image" src="./picture/transparency.png" alt="Image 1" width="150px" height="150px">
+            <div class="image-info">{557,0.35}</div>
+          </div>
+          <div class="image-container2">
+            <img class="image" src="./picture/transparency.png" alt="Image 2" width="150px" height="150px">
+              <div class="image-info">{582,0.47}</div>
+          </div>
+          
+          <div class="image-container3">
+            <img class="image" src="./picture/transparency.png" alt="Image 3" width="150px" height="150px">
+              <div class="image-info">{604,0.41}</div>
+          </div>
+          
+          <div class="image-container4">
+            <img class="image" src="./picture/transparency.png" alt="Image 4" width="150px" height="150px">
+              <div class="image-info">{585,0.39}</div>
+          </div>
+          
+          <div class="image-container5">
+            <img class="image" src="./picture/transparency.png" alt="Image 5" width="150px" height="150px">
+              <div class="image-info">{625,0.51}</div>
+          </div>
+
+          <div class="image-container6">
+            <img class="image" src="./picture/transparency.png" alt="Image 6" width="150px" height="150px">
+              <div class="image-info">{621,0.37}</div>
+          </div>
+          <div class="image-container7">
+            <img class="image" src="./picture/transparency.png" alt="Image 6" width="150px" height="150px">
+              <div class="image-info">{609,0.44}</div>
+          </div>
+          <div class="image-container8">
+            <img class="image" src="./picture/transparency.png" alt="Image 6" width="150px" height="100px">
+              <div class="image-info">{587,0.48}</div>
+          </div>
+          <div class="image-container9">
+            <img class="image" src="./picture/transparency.png" alt="Image 6" width="150px" height="100px">
+              <div class="image-info">{574,0.42}</div>
+          </div>
+      </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+
+$(function(){
+	$('.wrap').liMarquee({
+		direction: 'up',//身上滚动
+		//runshort: false,//内容不足时不滚动
+		scrollamount: 20//速度
+	});
+});
+
+const images = document.querySelectorAll('.image');
+    const infos = document.querySelectorAll('.image-info');
+
+    images.forEach((image, index) => {
+        image.addEventListener('mouseenter', function() {
+            infos[index].style.display = 'block';
+        });
+
+        image.addEventListener('mouseleave', function() {
+            infos[index].style.display = 'none';
+        });
+    });
+
+//     // 初始化 ECharts 实例
+//     var chartDom = document.getElementById('main_1');
+//     var myChart = echarts.init(chartDom);
+//     var option;
+
+//     // 配置图表选项
+//     option = {
+//       xAxis: {
+//         scale: true
+//       },
+//       yAxis: {
+//         scale: true
+//       },
+//       series: [
+//         {
+//           type: 'effectScatter',
+//           symbolSize: 20,
+//           data: [
+//             [172.7, 105.2],
+//             [153.4, 42]
+//           ]
+//         },
+//         {
+//           type: 'scatter',
+//           data: [
+//             [161.2, 51.6], [167.5, 59.0], [159.5, 49.2], [157.0, 63.0], [155.8, 53.6],
+//             [170.0, 59.0], [159.1, 47.6], [166.0, 69.8], [176.2, 66.8], [160.2, 75.2],
+//             [172.5, 55.2], [170.9, 54.2], [172.9, 62.5], [153.4, 42.0], [160.0, 50.0],
+//             [147.2, 49.8], [168.2, 49.2], [175.0, 73.2], [157.0, 47.8], [167.6, 68.8],
+//             [159.5, 50.6], [175.0, 82.5], [166.8, 57.2], [176.5, 87.8], [170.2, 72.8],
+//             [174.0, 54.5], [173.0, 59.8], [179.9, 67.3], [170.5, 67.8], [160.0, 47.0]
+//           ]
+//         }
+//       ]
+//     };
+//     // 设置图表选项
+//     option && myChart.setOption(option);
+// </script>
+
+</body>
+</html>
